@@ -9,14 +9,16 @@ import (
 	"text/template"
 )
 
-var newBuffer = `
+var createBuffer = `
 (let ((buf (generate-new-buffer "{{.}}")))
-        (read-only-mode 1)
 	(buffer-name buf))`
-var insertData = `
+var updateBuffer = `
 (with-current-buffer {{.Name}}
   (goto-char (point-max))
   (insert "{{js .Data}}\n"))`
+var setMode = `
+(with-current-buffer {{.Name}}
+  ({{.Data}}-mode))`
 
 const BUFFER_NAME = "*stdin*"
 
@@ -26,6 +28,7 @@ type Chunk struct {
 }
 
 func main() {
+	modeName := os.Args[1]
 	bufferName, err := CreateBuffer()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create buffer: %v\n", err)
@@ -46,11 +49,28 @@ func main() {
 	//fmt.Fprintf(os.Stderr, "Read %d lines\n", i)
 	done <- true
 	<-done
+	if modeName != "" {
+		SetMode(bufferName, modeName, done)
+		<-done
+	}
 	os.Exit(0)
 }
 
+func SetMode(bufferName, modeName string, done chan bool) {
+	tmpl, err := template.New("").Parse(setMode)
+	if err != nil {
+		done <- true
+		return
+	}
+	var buf bytes.Buffer
+	tmpl.Execute(&buf, Chunk{bufferName, modeName})
+	c := exec.Command("emacsclient", "-n", "-u", "-e", buf.String())
+	c.CombinedOutput()
+	done <- true
+}
+
 func CreateBuffer() (string, error) {
-	tmpl, err := template.New("").Parse(newBuffer)
+	tmpl, err := template.New("").Parse(createBuffer)
 	if err != nil {
 		return "", err
 	}
@@ -64,7 +84,7 @@ func CreateBuffer() (string, error) {
 	}
 }
 func UpdateBuffer(bufferName string, ch chan string, done chan bool) {
-	tmpl, err := template.New("").Parse(insertData)
+	tmpl, err := template.New("").Parse(updateBuffer)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to parse template: %v\n", err)
 	}
