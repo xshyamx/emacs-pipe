@@ -46,6 +46,7 @@ func main() {
 	//fmt.Fprintf(os.Stderr, "Read %d lines\n", i)
 	done <- true
 	<-done
+	os.Exit(0)
 }
 
 func CreateBuffer() (string, error) {
