@@ -16,3 +16,6 @@ windows: prepare
 
 test: build
 	./simple.sh | ./build/ep
+
+install: build
+	cp -fv build/ep $(HOME)/.local/bin
