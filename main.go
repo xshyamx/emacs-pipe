@@ -43,7 +43,7 @@ func main() {
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "reading standard input:", err)
 	}
-	fmt.Fprintf(os.Stderr, "Read %d lines\n", i)
+	//fmt.Fprintf(os.Stderr, "Read %d lines\n", i)
 	done <- true
 	<-done
 }
@@ -75,12 +75,13 @@ func UpdateBuffer(bufferName string, ch chan string, done chan bool) {
 			tmpl.Execute(&buf, Chunk{bufferName, line})
 			c := exec.Command("emacsclient", "-n", "-u", "-e", buf.String())
 			if _, err := c.CombinedOutput(); err != nil {
-				fmt.Fprintf(os.Stderr, "Failed to send chunk: %v\n", err)
+				// probably the buffer was closed
+				os.Exit(1)
 			}
 			i++
 			buf.Reset()
 		case <-done:
-			fmt.Fprintf(os.Stderr, "Sent %d lines\n", i)
+			//fmt.Fprintf(os.Stderr, "Sent %d lines\n", i)
 			done <- true
 		}
 	}
