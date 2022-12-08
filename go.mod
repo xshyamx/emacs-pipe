@@ -1,3 +1,3 @@
-module github.com/xshyamx/emacs-pipe
+module github.com/xshyamx/pipe-to-emacs
 
 go 1.19
