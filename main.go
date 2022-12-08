@@ -14,8 +14,8 @@ var createBuffer = `
 	(buffer-name buf))`
 var updateBuffer = `
 (with-current-buffer {{.Name}}
-  (goto-char (point-max))
-  (insert "{{js .Data}}\n"))`
+  (save-excursion (goto-char (point-max))
+  (insert "{{js .Data}}\n")))`
 var setMode = `
 (with-current-buffer {{.Name}}
   ({{.Data}}-mode))`
