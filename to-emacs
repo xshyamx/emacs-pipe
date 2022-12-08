@@ -1,0 +1,23 @@
+#!/bin/sh
+
+ext="$1"
+fn="$RANDOM"
+
+if [ "$ext" = "" ]; then
+  file=/tmp/$fn
+else
+  file=/tmp/$fn.$ext
+fi
+
+# from http://unix.stackexchange.com/questions/154485/how-do-i-capture-stdin-to-a-variable-without-stripping-any-trailing-newlines
+INPUT=`cat; echo ___xxx___`
+printf '%s' "$INPUT" | sed 's/___xxx___//' > $file
+
+#echo $(cat) > $file
+
+#while read -r line
+#do
+#    echo $line >> $file
+#done
+
+emacsclient -n $file
