@@ -28,7 +28,6 @@ type Chunk struct {
 }
 
 func main() {
-	modeName := os.Args[1]
 	bufferName, err := CreateBuffer()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create buffer: %v\n", err)
@@ -49,9 +48,13 @@ func main() {
 	//fmt.Fprintf(os.Stderr, "Read %d lines\n", i)
 	done <- true
 	<-done
-	if modeName != "" {
-		SetMode(bufferName, modeName, done)
-		<-done
+
+	if len(os.Args) > 1 {
+		modeName := os.Args[1]
+		if modeName != "" {
+			SetMode(bufferName, modeName, done)
+			<-done
+		}
 	}
 	os.Exit(0)
 }
