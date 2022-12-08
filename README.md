@@ -1,4 +1,4 @@
-# Emacs Pipe #
+# Pipe to Emacs #
 
 Solves the problem of sending text from stdin to emacs. `emacsclient`
 can handle files but, not `stdin`. The common solution is to redirect to a temporary file and open it via emacsclient (See [Piping things into Emacs][emacs-wiki]).
