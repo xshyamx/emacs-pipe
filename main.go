@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"text/template"
@@ -36,14 +37,19 @@ func main() {
 	done := make(chan bool)
 	// start update buffer routine
 	go UpdateBuffer(bufferName, ch, done)
-	scanner := bufio.NewScanner(os.Stdin)
+	scanner := bufio.NewReader(os.Stdin)
 	i := 0
-	for scanner.Scan() {
+	for {
+		line, err := scanner.ReadString('\n')
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "reading standard input:", err)
+			break
+		}
 		i++
-		ch <- scanner.Text()
-	}
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading standard input:", err)
+		ch <- line
 	}
 	//fmt.Fprintf(os.Stderr, "Read %d lines\n", i)
 	done <- true
